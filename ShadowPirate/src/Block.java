@@ -7,10 +7,12 @@ public class Block{
     private final static int DAMAGE_POINTS = 10;
     private final int x;
     private final int y;
+    private Rectangle blockBox;
 
     public Block(int startX, int startY) {
         this.x = startX;
         this.y = startY;
+        this.blockBox = new Rectangle(startX, startY, BLOCK.getWidth(), BLOCK.getHeight());
     }
 
     /**
@@ -24,7 +26,15 @@ public class Block{
         return DAMAGE_POINTS;
     }
 
-    public Rectangle getBoundingBox() {
-        return BLOCK.getBoundingBox();
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public Rectangle getBlockBox() {
+        return blockBox;
     }
 }

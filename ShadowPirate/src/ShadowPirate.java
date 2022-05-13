@@ -29,7 +29,6 @@ public class ShadowPirate extends AbstractGame {
 
     private final static int MAX_ARRAY_SIZE = 49;
 
-    // array to store blocks
     private final static Block[] blocks = new Block[MAX_ARRAY_SIZE];
 
     private Sailor sailor;
@@ -66,17 +65,14 @@ public class ShadowPirate extends AbstractGame {
             if ((line = reader.readLine()) != null) {
                 String[] sections = line.split(",");
                 if (sections[0].equals("Sailor")) {
-                    // read in sailor data from file
                     sailor = new Sailor(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
                 }
             }
 
             int current = 0;
-            // loop through lines in file
-            while((line = reader.readLine()) != null) {
+            while((line = reader.readLine()) != null) { // loop through lines in file
                 String[] sections = line.split(",");
                 if (sections[0].equals("Block")) {
-                    // add blocks to array
                     blocks[current] = new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
                     current++;
                 }
@@ -100,24 +96,19 @@ public class ShadowPirate extends AbstractGame {
             Window.close();
         }
 
-        // if the game has not started
-        if (!gameOn) {
+        if (!gameOn) { // if the game has not started
             drawStartScreen(input);
         }
 
-        // if the game has started
-        if (gameEnd || sailor.isOutOfBound()) {
-            gameEnd = true;
+        if (gameEnd) { // if the player lost
             drawEndScreen(END_MESSAGE);
         }
 
-        // if the player has won
-        if (gameWin) {
+        if (gameWin) { // if the player won
             drawEndScreen(WIN_MESSAGE);
         }
 
-        // when game is running
-        if (gameOn && !gameEnd && !gameWin) {
+        if (gameOn && !gameEnd && !gameWin) { // when the game is running
 
             // update each block
             for (Block block : blocks) {
@@ -126,6 +117,7 @@ public class ShadowPirate extends AbstractGame {
 
             // update sailor
             sailor.update(input, blocks);
+
 
             // end the game if sailor is dead
             if (sailor.isDead()) {
