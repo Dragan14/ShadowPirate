@@ -8,7 +8,7 @@ public class Block{
     private final int x;
     private final int y;
 
-    public Block(int startX, int startY){
+    public Block(int startX, int startY) {
         this.x = startX;
         this.y = startY;
     }
@@ -17,14 +17,14 @@ public class Block{
      * Method that performs state update
      */
     public void update() {
-        BLOCK.draw(x, y);
+        BLOCK.drawFromTopLeft(x, y);
     }
 
     public int getDAMAGE_POINTS() {
         return DAMAGE_POINTS;
     }
 
-    public Rectangle getBoundingBox(){
-        return BLOCK.getBoundingBoxAt(new Point(x, y));
+    public Rectangle getBoundingBox() {
+        return BLOCK.getBoundingBox();
     }
 }
