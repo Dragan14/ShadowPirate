@@ -31,6 +31,8 @@ public class ShadowPirate extends AbstractGame {
 
     private final static Block[] blocks = new Block[MAX_ARRAY_SIZE];
 
+    private final static Enemy[] enemies = new Enemy[4];
+
     private Sailor sailor;
 
     private boolean gameOn;
@@ -62,19 +64,32 @@ public class ShadowPirate extends AbstractGame {
 
             String line;
 
-            if ((line = reader.readLine()) != null) {
+            int enemyCount = 0;
+            int blockCount = 0;
+
+            // loop through lines in the file
+            while((line = reader.readLine()) != null) {
                 String[] sections = line.split(",");
+
                 if (sections[0].equals("Sailor")) {
                     sailor = new Sailor(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
                 }
-            }
 
-            int current = 0;
-            while((line = reader.readLine()) != null) { // loop through lines in file
-                String[] sections = line.split(",");
-                if (sections[0].equals("Block")) {
-                    blocks[current] = new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
-                    current++;
+                else if (sections[0].equals("Pirate")) {
+                    enemies[enemyCount] = new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
+                            "pirate");
+                    enemyCount++;
+                }
+
+                else if (sections[0].equals("Block")) {
+                    blocks[blockCount] = new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
+                    blockCount++;
+                }
+
+                else if (sections[0].equals("Blackbeard")) {
+                    enemies[enemyCount] = new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
+                            "blackbeard");
+                    enemyCount++;
                 }
             }
 
@@ -118,6 +133,10 @@ public class ShadowPirate extends AbstractGame {
             // update sailor
             sailor.update(input, blocks);
 
+            // update each enemy
+            for (Enemy enemy: enemies) {
+                enemy.update(enemy.getEnemyMoveDirection(), blocks);
+            }
 
             // end the game if sailor is dead
             if (sailor.isDead()) {
