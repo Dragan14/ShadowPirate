@@ -3,6 +3,7 @@ import bagel.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * SWEN20003 Project 2, Semester 1, 2022
@@ -29,9 +30,9 @@ public class ShadowPirate extends AbstractGame {
 
     private final static int MAX_ARRAY_SIZE = 49;
 
-    private final static Block[] blocks = new Block[MAX_ARRAY_SIZE];
+    private final Block[] blocks = new Block[MAX_ARRAY_SIZE];
 
-    private final static Enemy[] enemies = new Enemy[4];
+    private final ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 
     private Sailor sailor;
 
@@ -64,7 +65,6 @@ public class ShadowPirate extends AbstractGame {
 
             String line;
 
-            int enemyCount = 0;
             int blockCount = 0;
 
             // loop through lines in the file
@@ -76,9 +76,8 @@ public class ShadowPirate extends AbstractGame {
                 }
 
                 else if (sections[0].equals("Pirate")) {
-                    enemies[enemyCount] = new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
-                            "pirate");
-                    enemyCount++;
+                    enemies.add(new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
+                            "pirate"));
                 }
 
                 else if (sections[0].equals("Block")) {
@@ -87,9 +86,8 @@ public class ShadowPirate extends AbstractGame {
                 }
 
                 else if (sections[0].equals("Blackbeard")) {
-                    enemies[enemyCount] = new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
-                            "blackbeard");
-                    enemyCount++;
+                    enemies.add(new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
+                            "blackbeard"));
                 }
             }
 
@@ -131,7 +129,7 @@ public class ShadowPirate extends AbstractGame {
             }
 
             // update sailor
-            sailor.update(input, blocks);
+            sailor.update(input, blocks, enemies);
 
             // update each enemy
             for (Enemy enemy: enemies) {

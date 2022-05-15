@@ -11,7 +11,7 @@ public abstract class Character {
     private final int MAX_HEALTH_POINTS;
     private final int DAMAGE_POINTS;
 
-    private final int COOLDOWN;
+    protected final int COOLDOWN;
     private int lastAttack;
 
     protected final static int BOTTOM_EDGE = 670;
@@ -27,6 +27,9 @@ public abstract class Character {
     protected final static Colour RED = new Colour(1, 0, 0);
 
     private int healthPoints;
+
+    private boolean facing = true; // false is facing left, true if facing right
+
 
     // store the top left coordinates of the character
     protected double x;
@@ -45,7 +48,7 @@ public abstract class Character {
         this.MAX_HEALTH_POINTS = MAX_HEALTH_POINTS;
         this.DAMAGE_POINTS = DAMAGE_POINTS;
         this.COOLDOWN = COOLDOWN;
-        this.lastAttack = 0;
+        this.lastAttack = COOLDOWN;
         this.FONT_SIZE = FONT_SIZE;
         this.FONT = new Font("res/wheaton.otf", FONT_SIZE);
         this.healthPoints = MAX_HEALTH_POINTS;
@@ -88,6 +91,11 @@ public abstract class Character {
      * Method that checks if sailor has gone out-of-bound
      */
     public abstract void isOutOfBound();
+
+    /**
+     * Method that determines the current image of the character depending on when they last attack
+     */
+    public abstract void setCurrentImage();
 
     public Image getMOVE_LEFT() {
         return MOVE_LEFT;
@@ -171,5 +179,12 @@ public abstract class Character {
 
     public void setCharacterBox(Rectangle characterBox) {
         this.characterBox = characterBox;
+    }
+
+    public boolean getFacing() {
+        return facing;
+    }
+    public void setFacing(boolean facing) {
+        this.facing = facing;
     }
 }

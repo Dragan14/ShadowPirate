@@ -1,7 +1,4 @@
-import bagel.Image;
-import bagel.Input;
-import bagel.Keys;
-import bagel.Window;
+import bagel.*;
 import bagel.util.Rectangle;
 import java.util.Random;
 import java.lang.Math;
@@ -52,6 +49,8 @@ public class Enemy extends Character {
             move(MOVE_SIZE,0);
             currentImage = MOVE_RIGHT;
         }
+        /*(new Drawing()).drawRectangle(getCharacterBox().topLeft(), currentImage.getWidth(), currentImage.getHeight(),
+                RED);*/
         currentImage.drawFromTopLeft(x, y);
         checkCollisions(blocks);
         isOutOfBound();
@@ -81,6 +80,11 @@ public class Enemy extends Character {
                 (getCharacterBox().centre().x > Window.getWidth())) {
             reverseDirection();
         }
+    }
+
+    public void setCurrentImage() {
+        //TODO
+        return;
     }
 
     /**

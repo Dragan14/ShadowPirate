@@ -1,6 +1,8 @@
 import bagel.*;
 import bagel.util.Rectangle;
 
+import java.util.ArrayList;
+
 public class Sailor extends Character {
     private final Image HIT_LEFT = new Image("res/sailor/sailorHitLeft.png");
     private final Image HIT_RIGHT = new Image("res/sailor/sailorHitRight.png");
@@ -35,7 +37,7 @@ public class Sailor extends Character {
     /**
      * Method that performs state update
      */
-    public void update(Input input, Block[] blocks) {
+    public void update(Input input, Block[] blocks, ArrayList<Enemy> enemies) {
         // store old coordinates every time the sailor moves
         if (input.isDown(Keys.UP)){
             setOldPoints();
@@ -46,18 +48,63 @@ public class Sailor extends Character {
         } else if (input.isDown(Keys.LEFT)) {
             setOldPoints();
             move(-MOVE_SIZE,0);
-            currentImage = MOVE_LEFT;
+            setFacing(false);
         } else if (input.isDown(Keys.RIGHT)) {
             setOldPoints();
             move(MOVE_SIZE,0);
-            currentImage = MOVE_RIGHT;
+            setFacing(true);
         } else if (input.wasPressed(Keys.S)) {
-            //
+            attack(enemies);
         }
+
+        setCurrentImage();
+
+        /*(new Drawing()).drawRectangle(getCharacterBox().topLeft(), currentImage.getWidth(), currentImage.getHeight(),
+                RED);*/
+
         currentImage.drawFromTopLeft(x, y);
         checkCollisions(blocks);
         isOutOfBound();
         renderHealthPoints();
+        setLastAttack(getLastAttack() + 1);
+    }
+
+    /**
+     * Method that attacks an enemy
+     */
+    private void attack(ArrayList<Enemy> enemies) {
+        // loop through enemies
+        for (Enemy enemy : enemies) {
+            if (getCharacterBox().intersects(enemy.getCharacterBox())) {
+                if (getLastAttack() >= COOLDOWN) {
+                    enemy.setHealthPoints(enemy.getHealthPoints() - 15); // reduce health of enemy
+                    setLastAttack(-1);
+                    if (enemy.getHealthPoints() <= 0) { // if enemy has 0 or less health they are removed from the game
+                        enemies.remove(enemy);
+                    }
+                    return; // the player can only attack one enemy at a time
+                }
+            }
+        }
+    }
+
+    /**
+     * Method that determines the current image of the character depending on when they last attack
+     */
+    public void setCurrentImage() {
+        if (getLastAttack() <= 120) { // if the player has attacked in the last 1000ms
+            if (getFacing() == false) {
+                currentImage = HIT_LEFT;
+            } else {
+                currentImage = HIT_RIGHT;
+            }
+        } else {
+            if (getFacing() == false) {
+                currentImage = getMOVE_LEFT();
+            } else {
+                currentImage = getMOVE_RIGHT();
+            }
+        }
     }
 
     /**
