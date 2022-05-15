@@ -1,5 +1,8 @@
 import bagel.*;
+import bagel.util.Point;
 import bagel.util.Rectangle;
+
+import java.util.ArrayList;
 import java.util.Random;
 import java.lang.Math;
 
@@ -7,8 +10,11 @@ public class Enemy extends Character {
     private final Image INVINCIBLE_LEFT;
     private final Image INVINCIBLE_RIGHT;
     private final String ENEMY_TYPE; // blackbeard or pirate
-    private final Rectangle ATTACK_RANGE;
+    private Rectangle attackBox;
     private int moveDir = (new Random()).nextInt(0,4); // random integer between 0 and 3 inclusive
+
+    protected int INVINCIBLE_COOLDOWN = 90;
+    private int invincible = INVINCIBLE_COOLDOWN;
 
     public Enemy(int startX, int startY, String ENEMY_TYPE) {
         // calls the constructor in the parent class
@@ -18,7 +24,7 @@ public class Enemy extends Character {
                 (new Random()).nextDouble(0.2,0.7),
                 toBlackbeardValue(45, true, ENEMY_TYPE),
                 toBlackbeardValue(10, true, ENEMY_TYPE),
-                toBlackbeardValue(3000, false, ENEMY_TYPE),
+                toBlackbeardValue(180, false, ENEMY_TYPE),
                 15,
                 startX,
                 startY,
@@ -30,13 +36,13 @@ public class Enemy extends Character {
 
         INVINCIBLE_RIGHT = new Image("res/" + ENEMY_TYPE + "/" + ENEMY_TYPE + "HitRight.png");
 
-        ATTACK_RANGE = new Rectangle(startX, startY, 100, 100);
+        setAttackBox();
     }
 
     /**
      * Method that performs state update
      */
-    public void update(Keys input, Block[] blocks) {
+    public void update(Keys input, Block[] blocks, Sailor sailor, ArrayList<Projectile> projectiles) {
         // store old coordinates every time the sailor moves
         if (input.equals(Keys.UP)){
             move(0, -MOVE_SIZE);
@@ -44,17 +50,41 @@ public class Enemy extends Character {
             move(0, MOVE_SIZE);
         } else if (input.equals(Keys.LEFT)) {
             move(-MOVE_SIZE,0);
-            currentImage = MOVE_LEFT;
         } else if (input.equals(Keys.RIGHT)) {
             move(MOVE_SIZE,0);
-            currentImage = MOVE_RIGHT;
         }
-        /*(new Drawing()).drawRectangle(getCharacterBox().topLeft(), currentImage.getWidth(), currentImage.getHeight(),
+        attack(sailor, projectiles);
+        /*(new Drawing()).drawRectangle(attackBox.topLeft(), 200, 200,
                 RED);*/
+        setCurrentImage();
         currentImage.drawFromTopLeft(x, y);
         checkCollisions(blocks);
         isOutOfBound();
         renderHealthPoints();
+        setAttackBox();
+        setLastAttack(getLastAttack() + 1);
+        invincible += 1;
+    }
+
+    /**
+     * Method that creates a new projectile
+     */
+    private void attack(Sailor sailor, ArrayList<Projectile> projectiles) {
+        if (attackBox.intersects(sailor.getCharacterBox())) {
+            if (getLastAttack() >= COOLDOWN) {
+                projectiles.add(new Projectile(ENEMY_TYPE, getCharacterBox().centre(),
+                        sailor.getCharacterBox().centre())); // create new projectile
+                setLastAttack(-1);
+            }
+        }
+    }
+
+    /**
+     * Method that sets the attackBox of the enemy
+     */
+    private void setAttackBox() {
+        attackBox = new Rectangle(getCharacterBox().centre().x - 100,
+                getCharacterBox().centre().y - 100, 200, 200);
     }
 
     /**
@@ -83,7 +113,19 @@ public class Enemy extends Character {
     }
 
     public void setCurrentImage() {
-        //TODO
+        if (invincible <= INVINCIBLE_COOLDOWN) { // if the player has attacked in the last 1000ms
+            if (getFacing() == false) {
+                currentImage = INVINCIBLE_LEFT;
+            } else {
+                currentImage = INVINCIBLE_RIGHT;
+            }
+        } else {
+            if (getFacing() == false) {
+                currentImage = getMOVE_LEFT();
+            } else {
+                currentImage = getMOVE_RIGHT();
+            }
+        }
         return;
     }
 
@@ -144,5 +186,13 @@ public class Enemy extends Character {
             return Keys.RIGHT;
         }
         return null;
+    }
+
+    public int getInvincible() {
+        return invincible;
+    }
+
+    public void setInvincible(int invincible) {
+        this.invincible = invincible;
     }
 }

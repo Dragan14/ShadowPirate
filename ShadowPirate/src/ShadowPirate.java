@@ -32,7 +32,9 @@ public class ShadowPirate extends AbstractGame {
 
     private final Block[] blocks = new Block[MAX_ARRAY_SIZE];
 
-    private final ArrayList<Enemy> enemies = new ArrayList<Enemy>();
+    private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
+
+    private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 
     private Sailor sailor;
 
@@ -133,8 +135,17 @@ public class ShadowPirate extends AbstractGame {
 
             // update each enemy
             for (Enemy enemy: enemies) {
-                enemy.update(enemy.getEnemyMoveDirection(), blocks);
+                enemy.update(enemy.getEnemyMoveDirection(), blocks, sailor, projectiles);
             }
+
+            // create a copy of the ArrayList
+            ArrayList<Projectile> projectilesClone = (ArrayList<Projectile>) projectiles.clone();
+            for (Projectile projectile: projectiles) {
+                if (projectile.update(sailor) == true) {
+                    projectilesClone.remove(projectile);
+                }
+            }
+            projectiles = projectilesClone;
 
             // end the game if sailor is dead
             if (sailor.isDead()) {

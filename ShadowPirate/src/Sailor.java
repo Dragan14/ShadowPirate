@@ -24,10 +24,10 @@ public class Sailor extends Character {
         // calls the constructor in the parent class
         super(new Image("res/sailor/sailorLeft.png"),
                 new Image("res/sailor/sailorRight.png"),
-                1,
+                5,
                 100,
                 15,
-                120,
+                180,
                 30,
                 startX,
                 startY,
@@ -53,7 +53,7 @@ public class Sailor extends Character {
             setOldPoints();
             move(MOVE_SIZE,0);
             setFacing(true);
-        } else if (input.wasPressed(Keys.S)) {
+        } if (input.wasPressed(Keys.S)) {
             attack(enemies);
         }
 
@@ -76,9 +76,10 @@ public class Sailor extends Character {
         // loop through enemies
         for (Enemy enemy : enemies) {
             if (getCharacterBox().intersects(enemy.getCharacterBox())) {
-                if (getLastAttack() >= COOLDOWN) {
-                    enemy.setHealthPoints(enemy.getHealthPoints() - 15); // reduce health of enemy
+                if ((getLastAttack() >= COOLDOWN) && (enemy.getInvincible() >= enemy.INVINCIBLE_COOLDOWN)) {
+                    enemy.setHealthPoints(enemy.getHealthPoints() - getDAMAGE_POINTS()); // reduce health of enemy
                     setLastAttack(-1);
+                    enemy.setInvincible(0);
                     if (enemy.getHealthPoints() <= 0) { // if enemy has 0 or less health they are removed from the game
                         enemies.remove(enemy);
                     }
@@ -92,7 +93,7 @@ public class Sailor extends Character {
      * Method that determines the current image of the character depending on when they last attack
      */
     public void setCurrentImage() {
-        if (getLastAttack() <= 120) { // if the player has attacked in the last 1000ms
+        if (getLastAttack() <= 60) { // if the player has attacked in the last 1000ms
             if (getFacing() == false) {
                 currentImage = HIT_LEFT;
             } else {
