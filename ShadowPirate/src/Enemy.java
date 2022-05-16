@@ -42,7 +42,8 @@ public class Enemy extends Character {
     /**
      * Method that performs state update
      */
-    public void update(Keys input, Block[] blocks, Sailor sailor, ArrayList<Projectile> projectiles) {
+    public void update(Keys input, Level level, ArrayList<Block> blocks, Sailor sailor,
+                       ArrayList<Projectile> projectiles) {
         // store old coordinates every time the sailor moves
         if (input.equals(Keys.UP)){
             move(0, -MOVE_SIZE);
@@ -54,12 +55,38 @@ public class Enemy extends Character {
             move(MOVE_SIZE,0);
         }
         attack(sailor, projectiles);
-        /*(new Drawing()).drawRectangle(attackBox.topLeft(), 200, 200,
+        /*(new Drawing()).drawRectangle(attackBoxf(), 200, 200,
                 RED);*/
         setCurrentImage();
         currentImage.drawFromTopLeft(x, y);
         checkCollisions(blocks);
-        isOutOfBound();
+        isOutOfBound(level);
+        renderHealthPoints();
+        setAttackBox();
+        setLastAttack(getLastAttack() + 1);
+        invincible += 1;
+    }
+
+    /**
+     * Method that performs state update
+     */
+    public void update(Keys input, Level level, Sailor sailor, ArrayList<Projectile> projectiles) {
+        // store old coordinates every time the sailor moves
+        if (input.equals(Keys.UP)){
+            move(0, -MOVE_SIZE);
+        } else if (input.equals(Keys.DOWN)) {
+            move(0, MOVE_SIZE);
+        } else if (input.equals(Keys.LEFT)) {
+            move(-MOVE_SIZE,0);
+        } else if (input.equals(Keys.RIGHT)) {
+            move(MOVE_SIZE,0);
+        }
+        attack(sailor, projectiles);
+        /*(new Drawing()).drawRectangle(attackBoxf(), 200, 200,
+                RED);*/
+        setCurrentImage();
+        currentImage.drawFromTopLeft(x, y);
+        isOutOfBound(level);
         renderHealthPoints();
         setAttackBox();
         setLastAttack(getLastAttack() + 1);
@@ -90,7 +117,7 @@ public class Enemy extends Character {
     /**
      * Method that checks for collisions between sailor and blocks
      */
-    public void checkCollisions(Block[] blocks) {
+    public void checkCollisions(ArrayList<Block> blocks) {
 
         // loop through blocks
         for (Block current : blocks) {
@@ -105,9 +132,9 @@ public class Enemy extends Character {
     /**
      * Method that checks if sailor has gone out-of-bound
      */
-    public void isOutOfBound() {
-        if ((getCharacterBox().centre().y > BOTTOM_EDGE) || (getCharacterBox().centre().y < TOP_EDGE) || (getCharacterBox().centre().x < 0) ||
-                (getCharacterBox().centre().x > Window.getWidth())) {
+    public void isOutOfBound(Level level) {
+        if ((getCharacterBox().topLeft().y > level.getBottomEdge()) || (getCharacterBox().topLeft().y < level.getTopEdge()) || (getCharacterBox().centre().x < level.getLeftEdge()) ||
+                (getCharacterBox().centre().x > level.getRightEdge())) {
             reverseDirection();
         }
     }

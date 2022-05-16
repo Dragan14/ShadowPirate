@@ -44,10 +44,12 @@ public class Projectile {
         calculateRotation();
 
         if (enemyType.equals("pirate")) {
+            // calculation for the x speed and y speed of the projectile
             X_SPEED = Math.abs(xDistance)/(xDistance) * Math.abs(Math.cos(rotatation)) * 0.4;
             Y_SPEED = Math.abs(yDistance)/(yDistance) * Math.abs(Math.sin(rotatation)) * 0.4;
             DAMAGE = 10;
         } else { // if the enemy is blackbeard
+            // calculation for the x speed and y speed of the projectile
             X_SPEED = Math.abs(xDistance)/(xDistance) * Math.abs(Math.cos(rotatation)) * 0.8;
             Y_SPEED = Math.abs(yDistance)/(yDistance) * Math.abs(Math.sin(rotatation)) * 0.8;
             DAMAGE = 20;

@@ -1,4 +1,7 @@
 import bagel.*;
+import bagel.util.Colour;
+import bagel.util.Point;
+import bagel.util.Rectangle;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,21 +19,22 @@ public class ShadowPirate extends AbstractGame {
     private final static int WINDOW_WIDTH = 1024;
     private final static int WINDOW_HEIGHT = 768;
     private final static String GAME_TITLE = "ShadowPirate";
-    private final Image BACKGROUND_IMAGE = new Image("res/background0.png");
-    private final static String WORLD_FILE = "res/level0.csv";
-    private final static String START_MESSAGE = "PRESS SPACE TO START";
-    private final static String INSTRUCTION_MESSAGE = "USE ARROW KEYS TO FIND LADDER";
-    private final static String END_MESSAGE = "GAME OVER";
-    private final static String WIN_MESSAGE = "CONGRATULATIONS!";
 
-    private final static int INSTRUCTION_OFFSET = 70;
-    private final static int FONT_SIZE = 55;
-    private final static int FONT_Y_POS = 402;
+    public final int BOTTOM_EDGE = 670;
+    public final int TOP_EDGE = 60;
+
+    private final int FONT_SIZE = 55;
+    private final int FONT_Y_POS = 402;
     private final Font FONT = new Font("res/wheaton.otf", FONT_SIZE);
 
-    private final static int MAX_ARRAY_SIZE = 49;
+    private final int LEVEL_COMPLETE_TIME = 180;
+    private int levelCompleteCounter = 0;
 
-    private final Block[] blocks = new Block[MAX_ARRAY_SIZE];
+    private final Image TREASURE_IMAGE = new Image("res/treasure.png");
+
+    private static Level level = new Level();
+
+    private ArrayList<Block> blocks = new ArrayList<Block>();
 
     private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 
@@ -45,7 +49,7 @@ public class ShadowPirate extends AbstractGame {
     // constructor to set the start of the game
     public ShadowPirate() {
         super(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE);
-        readCSV(WORLD_FILE);
+        readCSV(level.getWorldFile());
         gameWin = false;
         gameEnd = false;
         gameOn = false;
@@ -56,6 +60,7 @@ public class ShadowPirate extends AbstractGame {
      */
     public static void main(String[] args) {
         ShadowPirate game = new ShadowPirate();
+        level.setBackground(0);
         game.run();
     }
 
@@ -66,8 +71,6 @@ public class ShadowPirate extends AbstractGame {
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
 
             String line;
-
-            int blockCount = 0;
 
             // loop through lines in the file
             while((line = reader.readLine()) != null) {
@@ -82,14 +85,28 @@ public class ShadowPirate extends AbstractGame {
                             "pirate"));
                 }
 
-                else if (sections[0].equals("Block")) {
-                    blocks[blockCount] = new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
-                    blockCount++;
+                else if (sections[0].equals("Block") && (level.getLevelNumber() == 0)) {
+                    blocks.add(new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2])));
                 }
 
                 else if (sections[0].equals("Blackbeard")) {
                     enemies.add(new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
                             "blackbeard"));
+                }
+
+                else if (sections[0].equals("TopLeft")) {
+                    level.setLeftEdge(Integer.parseInt(sections[1]));
+                    level.setTopEdge(Integer.parseInt(sections[2]));
+                }
+
+                else if (sections[0].equals("BottomRight")) {
+                    level.setRightEdge(Integer.parseInt(sections[1]));
+                    level.setBottomEdge(Integer.parseInt(sections[2]));
+                }
+
+                else if (sections[0].equals("Treasure")) {
+                    level.setGoal(new Rectangle(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
+                            TREASURE_IMAGE.getWidth(), TREASURE_IMAGE.getHeight()));
                 }
             }
 
@@ -105,7 +122,6 @@ public class ShadowPirate extends AbstractGame {
      */
     @Override
     public void update(Input input) {
-        BACKGROUND_IMAGE.draw(Window.getWidth()/2.0, Window.getHeight()/2.0);
 
         if (input.wasPressed(Keys.ESCAPE)) {
             Window.close();
@@ -116,26 +132,55 @@ public class ShadowPirate extends AbstractGame {
         }
 
         if (gameEnd) { // if the player lost
-            drawEndScreen(END_MESSAGE);
+            drawEndScreen(level.END_MESSAGE);
         }
 
         if (gameWin) { // if the player won
-            drawEndScreen(WIN_MESSAGE);
+            if (level.getLevelNumber() == 0) {
+                if (levelCompleteCounter < LEVEL_COMPLETE_TIME) {
+                    drawEndScreen(level.getWinMessage());
+                    levelCompleteCounter += 1;
+                } else {
+                    gameWin = false;
+                    gameOn = false;
+                    level.setLevelNumber(1);
+                    enemies.clear();
+                    projectiles.clear();
+                    readCSV(level.getWorldFile());
+                }
+            } else {
+                drawEndScreen(level.getWinMessage());
+            }
         }
 
-        if (gameOn && !gameEnd && !gameWin) { // when the game is running
+        else if (gameOn && !gameEnd && !gameWin) { // when the game is running
+
+            level.getBackground().draw(Window.getWidth()/2.0, Window.getHeight()/2.0);
+
+            /*(new Drawing()).drawRectangle(level.getGoal().topLeft(), TREASURE_IMAGE.getWidth(),
+                    TREASURE_IMAGE.getHeight(), Colour.RED);*/
 
             // update each block
-            for (Block block : blocks) {
-                block.update();
-            }
+            if (level.getLevelNumber() == 0) {
+                for (Block block : blocks) {
+                    block.update();
+                }
 
-            // update sailor
-            sailor.update(input, blocks, enemies);
+                sailor.update(input, level, blocks, enemies);
 
-            // update each enemy
-            for (Enemy enemy: enemies) {
-                enemy.update(enemy.getEnemyMoveDirection(), blocks, sailor, projectiles);
+                for (Enemy enemy: enemies) {
+                    enemy.update(enemy.getEnemyMoveDirection(), level, blocks, sailor, projectiles);
+                }
+            } else {
+                //update sailor
+                sailor.update(input, level, enemies);
+
+                // update each enemy
+                for (Enemy enemy: enemies) {
+                    enemy.update(enemy.getEnemyMoveDirection(), level, sailor, projectiles);
+                }
+
+                TREASURE_IMAGE.drawFromTopLeft(level.getGoal().topLeft().x, level.getGoal().topLeft().y);
             }
 
             // create a copy of the ArrayList
@@ -153,7 +198,7 @@ public class ShadowPirate extends AbstractGame {
             }
 
             // end the game is sailor has won
-            if (sailor.hasWon()) {
+            if (sailor.hasWon(level)) {
                 gameWin = true;
             }
         }
@@ -165,10 +210,12 @@ public class ShadowPirate extends AbstractGame {
     private void drawStartScreen(Input input) {
         // draw start screen messages
 
-        FONT.drawString(START_MESSAGE, (Window.getWidth()/2.0 - (FONT.getWidth(START_MESSAGE)/2.0)),
+        FONT.drawString(level.START_MESSAGE, (Window.getWidth()/2.0 - (FONT.getWidth(level.START_MESSAGE)/2.0)),
                 FONT_Y_POS);
-        FONT.drawString(INSTRUCTION_MESSAGE, (Window.getWidth()/2.0 - (FONT.getWidth(INSTRUCTION_MESSAGE)/2.0)),
-                (FONT_Y_POS + INSTRUCTION_OFFSET));
+        FONT.drawString(level.INSTRUCTION_MESSAGE_1, (Window.getWidth()/2.0 - (FONT.getWidth(level.INSTRUCTION_MESSAGE_1)/2.0)),
+                (FONT_Y_POS + level.INSTRUCTION_OFFSET));
+        FONT.drawString(level.getInstructionMessage2(), (Window.getWidth()/2.0 - (FONT.getWidth(level.getInstructionMessage2())/2.0)),
+                (FONT_Y_POS + 2*level.INSTRUCTION_OFFSET));
         if (input.wasPressed(Keys.SPACE)) {
             // start game if user pressed SPACE
             gameOn = true;

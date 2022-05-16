@@ -2,6 +2,8 @@ import bagel.*;
 import bagel.util.Colour;
 import bagel.util.Rectangle;
 
+import java.util.ArrayList;
+
 public abstract class Character {
     protected final Image MOVE_LEFT;
     protected final Image MOVE_RIGHT;
@@ -13,9 +15,6 @@ public abstract class Character {
 
     protected final int COOLDOWN;
     private int lastAttack;
-
-    protected final static int BOTTOM_EDGE = 670;
-    protected final static int TOP_EDGE = 60;
 
     protected final static int ORANGE_BOUNDARY = 65;
     protected final static int RED_BOUNDARY = 35;
@@ -63,7 +62,7 @@ public abstract class Character {
     /**
      * Method that checks for collisions between sailor and blocks
      */
-    public abstract void checkCollisions(Block[] blocks);
+    public abstract void checkCollisions(ArrayList<Block> blocks);
 
     /**
      * Method that moves the sailor given the direction
@@ -90,7 +89,7 @@ public abstract class Character {
     /**
      * Method that checks if sailor has gone out-of-bound
      */
-    public abstract void isOutOfBound();
+    public abstract void isOutOfBound(Level level);
 
     /**
      * Method that determines the current image of the character depending on when they last attack

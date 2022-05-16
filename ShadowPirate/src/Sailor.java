@@ -17,9 +17,6 @@ public class Sailor extends Character {
 
     private Rectangle oldCharacterBox;
 
-    private final static int WIN_X = 990;
-    private final static int WIN_Y = 630;
-
     public Sailor(int startX, int startY) {
         // calls the constructor in the parent class
         super(new Image("res/sailor/sailorLeft.png"),
@@ -37,7 +34,7 @@ public class Sailor extends Character {
     /**
      * Method that performs state update
      */
-    public void update(Input input, Block[] blocks, ArrayList<Enemy> enemies) {
+    public void update(Input input, Level level, ArrayList<Block> blocks, ArrayList<Enemy> enemies) {
         // store old coordinates every time the sailor moves
         if (input.isDown(Keys.UP)){
             setOldPoints();
@@ -59,12 +56,38 @@ public class Sailor extends Character {
 
         setCurrentImage();
 
-        /*(new Drawing()).drawRectangle(getCharacterBox().topLeft(), currentImage.getWidth(), currentImage.getHeight(),
-                RED);*/
-
         currentImage.drawFromTopLeft(x, y);
         checkCollisions(blocks);
-        isOutOfBound();
+        isOutOfBound(level);
+        renderHealthPoints();
+        setLastAttack(getLastAttack() + 1);
+    }
+
+    /**
+     * Method that performs state update
+     */
+    public void update(Input input, Level level, ArrayList<Enemy> enemies) {
+        // store old coordinates every time the sailor moves
+        if (input.isDown(Keys.UP)){
+            setOldPoints();
+            move(0, -MOVE_SIZE);
+        } else if (input.isDown(Keys.DOWN)) {
+            setOldPoints();
+            move(0, MOVE_SIZE);
+        } else if (input.isDown(Keys.LEFT)) {
+            setOldPoints();
+            move(-MOVE_SIZE,0);
+            setFacing(false);
+        } else if (input.isDown(Keys.RIGHT)) {
+            move(MOVE_SIZE,0);
+            setFacing(true);
+        } if (input.wasPressed(Keys.S)) {
+            attack(enemies);
+        }
+        setCurrentImage();
+
+        currentImage.drawFromTopLeft(x, y);
+        isOutOfBound(level);
         renderHealthPoints();
         setLastAttack(getLastAttack() + 1);
     }
@@ -111,7 +134,7 @@ public class Sailor extends Character {
     /**
      * Method that checks for collisions between sailor and blocks
      */
-    public void checkCollisions(Block[] blocks) {
+    public void checkCollisions(ArrayList<Block> blocks) {
         // check collisions and print log
 
         // loop through blocks
@@ -125,11 +148,13 @@ public class Sailor extends Character {
     /**
      * Method that checks if sailor has gone out-of-bound
      */
-    public void isOutOfBound() {
-        if ((getCharacterBox().centre().y > BOTTOM_EDGE) || (getCharacterBox().centre().y < TOP_EDGE) || (getCharacterBox().centre().x < 0) ||
-                (getCharacterBox().centre().x > Window.getWidth())) {
+    public void isOutOfBound(Level level) {
+
+        if ((getCharacterBox().topLeft().y > level.getBottomEdge()) || (getCharacterBox().topLeft().y < level.getTopEdge()) || (getCharacterBox().centre().x < level.getLeftEdge()) ||
+                (getCharacterBox().centre().x > level.getRightEdge())) {
             moveBack();
         }
+
     }
 
     /**
@@ -166,7 +191,7 @@ public class Sailor extends Character {
     /**
      * Method that checks if sailor has reached the ladder
      */
-    public boolean hasWon() {
-        return (getCharacterBox().centre().x >= WIN_X) && (getCharacterBox().centre().y > WIN_Y);
+    public boolean hasWon(Level level) {
+        return getCharacterBox().intersects(level.getGoal());
     }
 }
