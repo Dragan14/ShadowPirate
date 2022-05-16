@@ -42,7 +42,7 @@ public class Enemy extends Character {
     /**
      * Method that performs state update
      */
-    public void update(Keys input, Level level, ArrayList<Block> blocks, Sailor sailor,
+    public void update(Keys input, Level level, ArrayList<Entity> entities, Sailor sailor,
                        ArrayList<Projectile> projectiles) {
         // store old coordinates every time the sailor moves
         if (input.equals(Keys.UP)){
@@ -59,33 +59,7 @@ public class Enemy extends Character {
                 RED);*/
         setCurrentImage();
         currentImage.drawFromTopLeft(x, y);
-        checkCollisions(blocks);
-        isOutOfBound(level);
-        renderHealthPoints();
-        setAttackBox();
-        setLastAttack(getLastAttack() + 1);
-        invincible += 1;
-    }
-
-    /**
-     * Method that performs state update
-     */
-    public void update(Keys input, Level level, Sailor sailor, ArrayList<Projectile> projectiles) {
-        // store old coordinates every time the sailor moves
-        if (input.equals(Keys.UP)){
-            move(0, -MOVE_SIZE);
-        } else if (input.equals(Keys.DOWN)) {
-            move(0, MOVE_SIZE);
-        } else if (input.equals(Keys.LEFT)) {
-            move(-MOVE_SIZE,0);
-        } else if (input.equals(Keys.RIGHT)) {
-            move(MOVE_SIZE,0);
-        }
-        attack(sailor, projectiles);
-        /*(new Drawing()).drawRectangle(attackBoxf(), 200, 200,
-                RED);*/
-        setCurrentImage();
-        currentImage.drawFromTopLeft(x, y);
+        checkCollisions(entities);
         isOutOfBound(level);
         renderHealthPoints();
         setAttackBox();
@@ -117,12 +91,12 @@ public class Enemy extends Character {
     /**
      * Method that checks for collisions between sailor and blocks
      */
-    public void checkCollisions(ArrayList<Block> blocks) {
+    private void checkCollisions(ArrayList<Entity> entities) {
 
         // loop through blocks
-        for (Block current : blocks) {
+        for (Entity current : entities) {
             // check collisions
-            if (getCharacterBox().intersects(current.getBlockBox())) {
+            if (getCharacterBox().intersects(current.getEntityBox())) {
                 reverseDirection();
                 return;
             }
@@ -139,6 +113,9 @@ public class Enemy extends Character {
         }
     }
 
+    /**
+     * Method that determines the current image of the character depending on when they last attack
+     */
     public void setCurrentImage() {
         if (invincible <= INVINCIBLE_COOLDOWN) { // if the player has attacked in the last 1000ms
             if (getFacing() == false) {
@@ -183,7 +160,6 @@ public class Enemy extends Character {
         }
         return value;
     }
-
 
     /**
      * Method that reverses the direction in which the enemy is moving

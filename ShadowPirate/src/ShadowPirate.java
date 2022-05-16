@@ -20,21 +20,19 @@ public class ShadowPirate extends AbstractGame {
     private final static int WINDOW_HEIGHT = 768;
     private final static String GAME_TITLE = "ShadowPirate";
 
-    public final int BOTTOM_EDGE = 670;
-    public final int TOP_EDGE = 60;
-
     private final int FONT_SIZE = 55;
     private final int FONT_Y_POS = 402;
     private final Font FONT = new Font("res/wheaton.otf", FONT_SIZE);
 
-    private final int LEVEL_COMPLETE_TIME = 180;
-    private int levelCompleteCounter = 0;
+    private final int LEVEL_COMPLETE_TIME = 180; // the amount of frames the level complete is to rendered for
+    private int levelCompleteCounter = 0; // counts number of the frames the level complete screen has been rendered for
 
     private final Image TREASURE_IMAGE = new Image("res/treasure.png");
 
     private static Level level = new Level();
 
-    private ArrayList<Block> blocks = new ArrayList<Block>();
+    // array to store the blocks and bombs
+    private ArrayList<Entity> entities = new ArrayList<Entity>();
 
     private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 
@@ -85,13 +83,17 @@ public class ShadowPirate extends AbstractGame {
                             "pirate"));
                 }
 
-                else if (sections[0].equals("Block") && (level.getLevelNumber() == 0)) {
-                    blocks.add(new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2])));
-                }
-
                 else if (sections[0].equals("Blackbeard")) {
                     enemies.add(new Enemy(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]),
                             "blackbeard"));
+                }
+
+                else if (sections[0].equals("Block")) {
+                    if (level.getLevelNumber() == 0) {
+                        entities.add(new Block(Integer.parseInt(sections[1]), Integer.parseInt(sections[2])));
+                    } else {
+                        entities.add(new Bomb(Integer.parseInt(sections[1]), Integer.parseInt(sections[2])));
+                    }
                 }
 
                 else if (sections[0].equals("TopLeft")) {
@@ -146,6 +148,7 @@ public class ShadowPirate extends AbstractGame {
                     level.setLevelNumber(1);
                     enemies.clear();
                     projectiles.clear();
+                    entities.clear();
                     readCSV(level.getWorldFile());
                 }
             } else {
@@ -155,31 +158,28 @@ public class ShadowPirate extends AbstractGame {
 
         else if (gameOn && !gameEnd && !gameWin) { // when the game is running
 
+            // render background
             level.getBackground().draw(Window.getWidth()/2.0, Window.getHeight()/2.0);
 
-            /*(new Drawing()).drawRectangle(level.getGoal().topLeft(), TREASURE_IMAGE.getWidth(),
-                    TREASURE_IMAGE.getHeight(), Colour.RED);*/
+            // render the sailor
+            sailor.update(input, level, entities, enemies);
 
-            // update each block
-            if (level.getLevelNumber() == 0) {
-                for (Block block : blocks) {
-                    block.update();
+            // render each enemy
+            for (Enemy enemy: enemies) {
+                enemy.update(enemy.getEnemyMoveDirection(), level, entities, sailor, projectiles);
+            }
+
+            // update each entity
+            ArrayList<Entity> entitiesClone = (ArrayList<Entity>) entities.clone();
+            for (Entity entity : entities) {
+                if(entity.update(sailor) == true) {
+                    entitiesClone.remove(entity);
                 }
+            }
+            entities = entitiesClone;
 
-                sailor.update(input, level, blocks, enemies);
-
-                for (Enemy enemy: enemies) {
-                    enemy.update(enemy.getEnemyMoveDirection(), level, blocks, sailor, projectiles);
-                }
-            } else {
-                //update sailor
-                sailor.update(input, level, enemies);
-
-                // update each enemy
-                for (Enemy enemy: enemies) {
-                    enemy.update(enemy.getEnemyMoveDirection(), level, sailor, projectiles);
-                }
-
+            if (level.getLevelNumber() == 1) {
+                // render the treasure
                 TREASURE_IMAGE.drawFromTopLeft(level.getGoal().topLeft().x, level.getGoal().topLeft().y);
             }
 

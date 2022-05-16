@@ -34,7 +34,7 @@ public class Sailor extends Character {
     /**
      * Method that performs state update
      */
-    public void update(Input input, Level level, ArrayList<Block> blocks, ArrayList<Enemy> enemies) {
+    public void update(Input input, Level level, ArrayList<Entity> entities, ArrayList<Enemy> enemies) {
         // store old coordinates every time the sailor moves
         if (input.isDown(Keys.UP)){
             setOldPoints();
@@ -54,36 +54,6 @@ public class Sailor extends Character {
             attack(enemies);
         }
 
-        setCurrentImage();
-
-        currentImage.drawFromTopLeft(x, y);
-        checkCollisions(blocks);
-        isOutOfBound(level);
-        renderHealthPoints();
-        setLastAttack(getLastAttack() + 1);
-    }
-
-    /**
-     * Method that performs state update
-     */
-    public void update(Input input, Level level, ArrayList<Enemy> enemies) {
-        // store old coordinates every time the sailor moves
-        if (input.isDown(Keys.UP)){
-            setOldPoints();
-            move(0, -MOVE_SIZE);
-        } else if (input.isDown(Keys.DOWN)) {
-            setOldPoints();
-            move(0, MOVE_SIZE);
-        } else if (input.isDown(Keys.LEFT)) {
-            setOldPoints();
-            move(-MOVE_SIZE,0);
-            setFacing(false);
-        } else if (input.isDown(Keys.RIGHT)) {
-            move(MOVE_SIZE,0);
-            setFacing(true);
-        } if (input.wasPressed(Keys.S)) {
-            attack(enemies);
-        }
         setCurrentImage();
 
         currentImage.drawFromTopLeft(x, y);
@@ -127,20 +97,6 @@ public class Sailor extends Character {
                 currentImage = getMOVE_LEFT();
             } else {
                 currentImage = getMOVE_RIGHT();
-            }
-        }
-    }
-
-    /**
-     * Method that checks for collisions between sailor and blocks
-     */
-    public void checkCollisions(ArrayList<Block> blocks) {
-        // check collisions and print log
-
-        // loop through blocks
-        for (Block current : blocks) {
-            if (getCharacterBox().intersects(current.getBlockBox())) {
-                moveBack();
             }
         }
     }

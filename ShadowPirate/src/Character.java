@@ -38,7 +38,6 @@ public abstract class Character {
 
     private Rectangle characterBox;
 
-    // constructor to set value of variables and constants
     public Character(Image MOVE_LEFT, Image MOVE_RIGHT, double MOVE_SIZE, int MAX_HEALTH_POINTS, int DAMAGE_POINTS,
                      int COOLDOWN, int FONT_SIZE, int x, int y, Image currentImage) {
         this.MOVE_LEFT = MOVE_LEFT;
@@ -60,12 +59,7 @@ public abstract class Character {
     }
 
     /**
-     * Method that checks for collisions between sailor and blocks
-     */
-    public abstract void checkCollisions(ArrayList<Block> blocks);
-
-    /**
-     * Method that moves the sailor given the direction
+     * Method that moves the character given the direction
      */
     protected void move(double xMove, double yMove) {
         x += xMove;
