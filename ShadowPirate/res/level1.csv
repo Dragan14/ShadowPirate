@@ -33,5 +33,5 @@ Block,860,260
 Block,968,395
 Blackbeard,800,180
 Treasure,937,70
-TopLeft,40,0
-BottomRight,1000,680
+TopLeft,40,20
+BottomRight,1000,715

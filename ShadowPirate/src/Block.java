@@ -10,10 +10,10 @@ public class Block extends Entity<Block>{
     /**
      * Method that performs state update
      */
-    public boolean update(Sailor sailor) {
-        ENTITY_IMAGE.drawFromTopLeft(getX(), getY());
+    public boolean update(Sailor sailor, int itemsCollected) {
+        ENTITY_IMAGE.drawFromTopLeft(X, Y);
 
-        if (getEntityBox().intersects(sailor.getCharacterBox())) {
+        if (ENTITY_BOX.intersects(sailor.getCharacterBox())) {
             sailor.moveBack();
         }
 

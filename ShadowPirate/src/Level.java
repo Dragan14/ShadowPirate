@@ -42,7 +42,7 @@ public class Level {
     }
 
     /**
-     * Method that updates the level background
+     * Method that updates the level background depending on the level number
      */
     public void setBackground(int levelNumber) {
         background = new Image("res/background" + levelNumber + ".png");
@@ -94,7 +94,7 @@ public class Level {
     }
 
     /**
-     * Method that updates the level world file
+     * Method that updates the level world file depending on the level number
      */
     public void setWorldFile(int levelNumber) {
         worldFile = "res/level" + levelNumber + ".csv";

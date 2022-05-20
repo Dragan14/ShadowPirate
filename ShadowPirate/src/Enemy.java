@@ -9,7 +9,7 @@ import java.lang.Math;
 public class Enemy extends Character {
     private final Image INVINCIBLE_LEFT;
     private final Image INVINCIBLE_RIGHT;
-    private final String ENEMY_TYPE; // blackbeard or pirate
+    public final String ENEMY_TYPE; // blackbeard or pirate
     private Rectangle attackBox;
     private int moveDir = (new Random()).nextInt(0,4); // random integer between 0 and 3 inclusive
 
@@ -54,9 +54,7 @@ public class Enemy extends Character {
         } else if (input.equals(Keys.RIGHT)) {
             move(MOVE_SIZE,0);
         }
-        attack(sailor, projectiles);
-        /*(new Drawing()).drawRectangle(attackBoxf(), 200, 200,
-                RED);*/
+        attack(sailor, projectiles, level);
         setCurrentImage();
         currentImage.drawFromTopLeft(x, y);
         checkCollisions(entities);
@@ -70,11 +68,12 @@ public class Enemy extends Character {
     /**
      * Method that creates a new projectile
      */
-    private void attack(Sailor sailor, ArrayList<Projectile> projectiles) {
+    private void attack(Sailor sailor, ArrayList<Projectile> projectiles, Level level) {
         if (attackBox.intersects(sailor.getCharacterBox())) {
             if (getLastAttack() >= COOLDOWN) {
                 projectiles.add(new Projectile(ENEMY_TYPE, getCharacterBox().centre(),
-                        sailor.getCharacterBox().centre())); // create new projectile
+                        sailor.getCharacterBox().centre(), level.getTopEdge(),
+                        level.getBottomEdge(), level.getLeftEdge(), level.getRightEdge()));
                 setLastAttack(-1);
             }
         }
@@ -96,7 +95,7 @@ public class Enemy extends Character {
         // loop through blocks
         for (Entity current : entities) {
             // check collisions
-            if (getCharacterBox().intersects(current.getEntityBox())) {
+            if (getCharacterBox().intersects(current.ENTITY_BOX)) {
                 reverseDirection();
                 return;
             }
@@ -107,7 +106,7 @@ public class Enemy extends Character {
      * Method that checks if sailor has gone out-of-bound
      */
     public void isOutOfBound(Level level) {
-        if ((getCharacterBox().topLeft().y > level.getBottomEdge()) || (getCharacterBox().topLeft().y < level.getTopEdge()) || (getCharacterBox().centre().x < level.getLeftEdge()) ||
+        if ((getCharacterBox().centre().y > level.getBottomEdge()) || (getCharacterBox().centre().y < level.getTopEdge()) || (getCharacterBox().centre().x < level.getLeftEdge()) ||
                 (getCharacterBox().centre().x > level.getRightEdge())) {
             reverseDirection();
         }
@@ -125,19 +124,19 @@ public class Enemy extends Character {
             }
         } else {
             if (getFacing() == false) {
-                currentImage = getMOVE_LEFT();
+                currentImage = MOVE_LEFT;
             } else {
-                currentImage = getMOVE_RIGHT();
+                currentImage = MOVE_RIGHT;
             }
         }
         return;
     }
 
     /**
-     * Method that renders the current health as a percentage on screen
+     * Method that renders the current health as a percentage above the enemy
      */
     public void renderHealthPoints() {
-        double percentageHP = ((double) getHealthPoints()/getMAX_HEALTH_POINTS()) * 100;
+        double percentageHP = ((double) getHealthPoints()/getMaxHealthPoints()) * 100;
         if (percentageHP <= RED_BOUNDARY) {
             COLOUR.setBlendColour(RED);
         } else if (percentageHP <= ORANGE_BOUNDARY) {

@@ -52,5 +52,5 @@ Pirate,203,410
 Pirate,800,600
 Pirate,560,250
 Pirate,900,250
-TopLeft,0,20
-BottomRight,1000,640
+TopLeft,20,75
+BottomRight,1005,670

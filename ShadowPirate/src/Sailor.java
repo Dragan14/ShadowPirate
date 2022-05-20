@@ -1,4 +1,5 @@
 import bagel.*;
+import bagel.util.Colour;
 import bagel.util.Rectangle;
 
 import java.util.ArrayList;
@@ -15,13 +16,16 @@ public class Sailor extends Character {
     private double oldX;
     private double oldY;
 
+    // has the sailor attacked
+    private boolean attacked;
+
     private Rectangle oldCharacterBox;
 
     public Sailor(int startX, int startY) {
         // calls the constructor in the parent class
         super(new Image("res/sailor/sailorLeft.png"),
                 new Image("res/sailor/sailorRight.png"),
-                5,
+                1,
                 100,
                 15,
                 180,
@@ -51,11 +55,17 @@ public class Sailor extends Character {
             move(MOVE_SIZE,0);
             setFacing(true);
         } if (input.wasPressed(Keys.S)) {
-            attack(enemies);
+            int enemiesSize = ((ArrayList<Enemy>) enemies.clone()).size();
+            // call attack multiple times so the sailor can attack multiple enemies that are overlapping
+            for (int i=0;i<enemiesSize;i++) {
+                attack(enemies);
+            }
+            if (attacked == true) {
+                setLastAttack(-1);
+            }
         }
-
+        attacked = false;
         setCurrentImage();
-
         currentImage.drawFromTopLeft(x, y);
         isOutOfBound(level);
         renderHealthPoints();
@@ -68,16 +78,20 @@ public class Sailor extends Character {
     private void attack(ArrayList<Enemy> enemies) {
         // loop through enemies
         for (Enemy enemy : enemies) {
-            if (getCharacterBox().intersects(enemy.getCharacterBox())) {
-                if ((getLastAttack() >= COOLDOWN) && (enemy.getInvincible() >= enemy.INVINCIBLE_COOLDOWN)) {
-                    enemy.setHealthPoints(enemy.getHealthPoints() - getDAMAGE_POINTS()); // reduce health of enemy
-                    setLastAttack(-1);
+            if (getLastAttack() >= COOLDOWN) {
+                if ((getCharacterBox().intersects(enemy.getCharacterBox())) && (enemy.getInvincible() >= enemy.INVINCIBLE_COOLDOWN)) {
+                    enemy.setHealthPoints(enemy.getHealthPoints() - getdamagePoints()); // reduce health of enemy
                     enemy.setInvincible(0);
                     if (enemy.getHealthPoints() <= 0) { // if enemy has 0 or less health they are removed from the game
                         enemies.remove(enemy);
                     }
-                    return; // the player can only attack one enemy at a time
+                    System.out.println("Sailor inflicts " + getdamagePoints() + " damage points on "
+                            + (enemy.ENEMY_TYPE.substring(0, 1).toUpperCase() + enemy.ENEMY_TYPE.substring(1))
+                            + ". " + (enemy.ENEMY_TYPE.substring(0, 1).toUpperCase() + enemy.ENEMY_TYPE.substring(1))
+                            + "’s current health: " + enemy.getHealthPoints() + "/" + enemy.getMaxHealthPoints());
+                    return;
                 }
+                attacked = true;
             }
         }
     }
@@ -94,9 +108,9 @@ public class Sailor extends Character {
             }
         } else {
             if (getFacing() == false) {
-                currentImage = getMOVE_LEFT();
+                currentImage = MOVE_LEFT;
             } else {
-                currentImage = getMOVE_RIGHT();
+                currentImage = MOVE_RIGHT;
             }
         }
     }
@@ -105,8 +119,7 @@ public class Sailor extends Character {
      * Method that checks if sailor has gone out-of-bound
      */
     public void isOutOfBound(Level level) {
-
-        if ((getCharacterBox().topLeft().y > level.getBottomEdge()) || (getCharacterBox().topLeft().y < level.getTopEdge()) || (getCharacterBox().centre().x < level.getLeftEdge()) ||
+        if ((getCharacterBox().centre().y > level.getBottomEdge()) || (getCharacterBox().centre().y < level.getTopEdge()) || (getCharacterBox().centre().x < level.getLeftEdge()) ||
                 (getCharacterBox().centre().x > level.getRightEdge())) {
             moveBack();
         }
@@ -135,11 +148,13 @@ public class Sailor extends Character {
      * Method that renders the current health as a percentage on screen
      */
     public void renderHealthPoints() {
-        double percentageHP = ((double) getHealthPoints()/getMAX_HEALTH_POINTS()) * 100;
+        double percentageHP = ((double) getHealthPoints()/getMaxHealthPoints()) * 100;
         if (percentageHP <= RED_BOUNDARY) {
             COLOUR.setBlendColour(RED);
         } else if (percentageHP <= ORANGE_BOUNDARY) {
             COLOUR.setBlendColour(ORANGE);
+        } else {
+            COLOUR.setBlendColour(GREEN);
         }
         FONT.drawString(Math.round(percentageHP) + "%", healthX, healthY, COLOUR);
     }

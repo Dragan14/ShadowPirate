@@ -38,6 +38,14 @@ public class ShadowPirate extends AbstractGame {
 
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 
+    private Sword sword;
+
+    private Potion potion;
+
+    private Elixir elixir;
+
+    private int itemsCollected = 0; // the number of items collected (sword, potion or elixir)
+
     private Sailor sailor;
 
     private boolean gameOn;
@@ -96,6 +104,18 @@ public class ShadowPirate extends AbstractGame {
                     }
                 }
 
+                else if (sections[0].equals("Sword")) {
+                    sword = new Sword(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
+                }
+
+                else if (sections[0].equals("Potion")) {
+                    potion = new Potion(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
+                }
+
+                else if (sections[0].equals("Elixir")) {
+                    elixir = new Elixir(Integer.parseInt(sections[1]), Integer.parseInt(sections[2]));
+                }
+
                 else if (sections[0].equals("TopLeft")) {
                     level.setLeftEdge(Integer.parseInt(sections[1]));
                     level.setTopEdge(Integer.parseInt(sections[2]));
@@ -139,7 +159,7 @@ public class ShadowPirate extends AbstractGame {
 
         if (gameWin) { // if the player won
             if (level.getLevelNumber() == 0) {
-                if (levelCompleteCounter < LEVEL_COMPLETE_TIME) {
+                if (levelCompleteCounter <= LEVEL_COMPLETE_TIME) {
                     drawEndScreen(level.getWinMessage());
                     levelCompleteCounter += 1;
                 } else {
@@ -169,21 +189,16 @@ public class ShadowPirate extends AbstractGame {
                 enemy.update(enemy.getEnemyMoveDirection(), level, entities, sailor, projectiles);
             }
 
-            // update each entity
+            // update all the bombs and blocks
             ArrayList<Entity> entitiesClone = (ArrayList<Entity>) entities.clone();
             for (Entity entity : entities) {
-                if(entity.update(sailor) == true) {
+                if(entity.update(sailor, itemsCollected) == true) {
                     entitiesClone.remove(entity);
                 }
             }
             entities = entitiesClone;
 
-            if (level.getLevelNumber() == 1) {
-                // render the treasure
-                TREASURE_IMAGE.drawFromTopLeft(level.getGoal().topLeft().x, level.getGoal().topLeft().y);
-            }
-
-            // create a copy of the ArrayList
+            // update all the projectiles
             ArrayList<Projectile> projectilesClone = (ArrayList<Projectile>) projectiles.clone();
             for (Projectile projectile: projectiles) {
                 if (projectile.update(sailor) == true) {
@@ -191,6 +206,23 @@ public class ShadowPirate extends AbstractGame {
                 }
             }
             projectiles = projectilesClone;
+
+            if (level.getLevelNumber() == 1) {
+                // render the treasure
+                TREASURE_IMAGE.drawFromTopLeft(level.getGoal().topLeft().x, level.getGoal().topLeft().y);
+                // render the sword
+                if (sword.update(sailor, itemsCollected)) {
+                    itemsCollected += 1;
+                }
+                // render the potion
+                if (potion.update(sailor, itemsCollected)) {
+                    itemsCollected += 1;
+                }
+                // render the elixir
+                if (elixir.update(sailor, itemsCollected)) {
+                    itemsCollected += 1;
+                }
+            }
 
             // end the game if sailor is dead
             if (sailor.isDead()) {

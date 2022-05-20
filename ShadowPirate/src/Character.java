@@ -10,8 +10,8 @@ public abstract class Character {
 
     protected final double MOVE_SIZE;
 
-    private final int MAX_HEALTH_POINTS;
-    private final int DAMAGE_POINTS;
+    private int maxHealthPoints;
+    private int damagePoints;
 
     protected final int COOLDOWN;
     private int lastAttack;
@@ -21,14 +21,13 @@ public abstract class Character {
     private final int FONT_SIZE;
     protected final Font FONT;
     protected DrawOptions COLOUR = new DrawOptions();
-    private final static Colour GREEN = new Colour(0, 0.8, 0.2);
+    protected final static Colour GREEN = new Colour(0, 0.8, 0.2);
     protected final static Colour ORANGE = new Colour(0.9, 0.6, 0);
     protected final static Colour RED = new Colour(1, 0, 0);
 
     private int healthPoints;
 
     private boolean facing = true; // false is facing left, true if facing right
-
 
     // store the top left coordinates of the character
     protected double x;
@@ -38,18 +37,18 @@ public abstract class Character {
 
     private Rectangle characterBox;
 
-    public Character(Image MOVE_LEFT, Image MOVE_RIGHT, double MOVE_SIZE, int MAX_HEALTH_POINTS, int DAMAGE_POINTS,
+    public Character(Image MOVE_LEFT, Image MOVE_RIGHT, double MOVE_SIZE, int maxHealthPoints, int damagePoints,
                      int COOLDOWN, int FONT_SIZE, int x, int y, Image currentImage) {
         this.MOVE_LEFT = MOVE_LEFT;
         this.MOVE_RIGHT = MOVE_RIGHT;
         this.MOVE_SIZE = MOVE_SIZE;
-        this.MAX_HEALTH_POINTS = MAX_HEALTH_POINTS;
-        this.DAMAGE_POINTS = DAMAGE_POINTS;
+        this.maxHealthPoints = maxHealthPoints;
+        this.damagePoints = damagePoints;
         this.COOLDOWN = COOLDOWN;
         this.lastAttack = COOLDOWN;
         this.FONT_SIZE = FONT_SIZE;
         this.FONT = new Font("res/wheaton.otf", FONT_SIZE);
-        this.healthPoints = MAX_HEALTH_POINTS;
+        this.healthPoints = maxHealthPoints;
         this.x = x;
         this.y = y;
         this.currentImage = currentImage;
@@ -68,7 +67,7 @@ public abstract class Character {
     }
 
     /**
-     * Method that renders the current health as a percentage on screen
+     * Method that renders the current health as a percentage
      */
     public abstract void renderHealthPoints();
 
@@ -90,44 +89,12 @@ public abstract class Character {
      */
     public abstract void setCurrentImage();
 
-    public Image getMOVE_LEFT() {
-        return MOVE_LEFT;
-    }
-
-    public Image getMOVE_RIGHT() {
-        return MOVE_RIGHT;
-    }
-
-    public double getMOVE_SIZE() {
-        return MOVE_SIZE;
-    }
-
-    public int getMAX_HEALTH_POINTS() {
-        return MAX_HEALTH_POINTS;
-    }
-
-    public int getDAMAGE_POINTS() {
-        return DAMAGE_POINTS;
-    }
-
-    public int getCOOLDOWN() {
-        return COOLDOWN;
+    public int getdamagePoints() {
+        return damagePoints;
     }
 
     public int getLastAttack() {
         return lastAttack;
-    }
-
-    public int getFONT_SIZE() {
-        return FONT_SIZE;
-    }
-
-    public Font getFONT() {
-        return FONT;
-    }
-
-    public DrawOptions getCOLOUR() {
-        return COLOUR;
     }
 
     public int getHealthPoints() {
@@ -140,10 +107,6 @@ public abstract class Character {
 
     public double getY() {
         return y;
-    }
-
-    public Image getCurrentImage() {
-        return currentImage;
     }
 
     public Rectangle getCharacterBox() {
@@ -166,10 +129,6 @@ public abstract class Character {
         this.y = y;
     }
 
-    public void setCurrentImage(Image currentImage) {
-        this.currentImage = currentImage;
-    }
-
     public void setCharacterBox(Rectangle characterBox) {
         this.characterBox = characterBox;
     }
@@ -177,7 +136,20 @@ public abstract class Character {
     public boolean getFacing() {
         return facing;
     }
+
     public void setFacing(boolean facing) {
         this.facing = facing;
+    }
+
+    public void setDamagePoints(int damagePoints) {
+        this.damagePoints = damagePoints;
+    }
+
+    public void setMaxHealthPoints(int maxHealthPoints) {
+        this.maxHealthPoints = maxHealthPoints;
+    }
+
+    public int getMaxHealthPoints() {
+        return maxHealthPoints;
     }
 }

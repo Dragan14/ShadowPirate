@@ -5,8 +5,10 @@ import bagel.util.Rectangle;
 import java.lang.Math;
 
 public class Projectile {
-    private final static int BOTTOM_EDGE = 670;
-    private final static int TOP_EDGE = 60;
+    private int BOTTOM_EDGE;
+    private int TOP_EDGE;
+    private int LEFT_EDGE;
+    private int RIGHT_EDGE;
 
     private final String ENEMY_TYPE; // the type of enemy that fired the projectile
     private final int DAMAGE;
@@ -16,6 +18,12 @@ public class Projectile {
     private double y; // y position of the projectile
     private final double X_SPEED;
     private final double Y_SPEED;
+    // (X_SPEED)^2 + (Y_SPEED)^2 = TOTAL SPEED
+
+    private final double PIRATE_PROJECTILE_SPEED = 0.4;
+    private final double BLACKBEARD_PROJECTILE_SPEED = 0.4;
+    private final int PIRATE_DAMAGE = 10;
+    private final int BLACKBEARD_DAMAGE = 20;
 
     private final Point ENEMY_POINT;
     private final Point SAILOR_POINT;
@@ -27,10 +35,16 @@ public class Projectile {
     private final double yDistance;
     private final double xDistance;
 
-    public Projectile(String enemyType, Point ENEMY_POINT, Point SAILOR_POINT) {
+    public Projectile(String enemyType, Point ENEMY_POINT, Point SAILOR_POINT, int TOP_EDGE, int BOTTOM_EDGE,
+                      int LEFT_EDGE, int RIGHT_EDGE) {
         this.ENEMY_TYPE = enemyType;
         this.ENEMY_POINT = ENEMY_POINT;
         this.SAILOR_POINT = SAILOR_POINT;
+
+        this.TOP_EDGE = TOP_EDGE;
+        this.BOTTOM_EDGE = BOTTOM_EDGE;
+        this.LEFT_EDGE = LEFT_EDGE;
+        this.RIGHT_EDGE = RIGHT_EDGE;
 
         this.x = ENEMY_POINT.x;
         this.y = ENEMY_POINT.y;
@@ -45,14 +59,14 @@ public class Projectile {
 
         if (enemyType.equals("pirate")) {
             // calculation for the x speed and y speed of the projectile
-            X_SPEED = Math.abs(xDistance)/(xDistance) * Math.abs(Math.cos(rotatation)) * 0.4;
-            Y_SPEED = Math.abs(yDistance)/(yDistance) * Math.abs(Math.sin(rotatation)) * 0.4;
-            DAMAGE = 10;
+            X_SPEED = Math.abs(xDistance)/(xDistance) * Math.abs(Math.cos(rotatation)) * PIRATE_PROJECTILE_SPEED;
+            Y_SPEED = Math.abs(yDistance)/(yDistance) * Math.abs(Math.sin(rotatation)) * PIRATE_PROJECTILE_SPEED;
+            DAMAGE = PIRATE_DAMAGE;
         } else { // if the enemy is blackbeard
             // calculation for the x speed and y speed of the projectile
-            X_SPEED = Math.abs(xDistance)/(xDistance) * Math.abs(Math.cos(rotatation)) * 0.8;
-            Y_SPEED = Math.abs(yDistance)/(yDistance) * Math.abs(Math.sin(rotatation)) * 0.8;
-            DAMAGE = 20;
+            X_SPEED = Math.abs(xDistance)/(xDistance) * Math.abs(Math.cos(rotatation)) * BLACKBEARD_PROJECTILE_SPEED;
+            Y_SPEED = Math.abs(yDistance)/(yDistance) * Math.abs(Math.sin(rotatation)) * BLACKBEARD_PROJECTILE_SPEED;
+            DAMAGE = BLACKBEARD_DAMAGE;
         }
     }
 
@@ -95,8 +109,11 @@ public class Projectile {
     private void checkCollisions(Sailor sailor) {
         if (sailor.getCharacterBox().intersects(new Point(x,y))) {
             sailor.setHealthPoints(sailor.getHealthPoints() - DAMAGE); // inflict damage to the sailor
+            System.out.println((ENEMY_TYPE.substring(0, 1).toUpperCase() + ENEMY_TYPE.substring(1)) + " inflicts " + DAMAGE
+                    + " damage points on Sailor. Sailor’s current health: "
+                    + sailor.getHealthPoints() + "/" + sailor.getMaxHealthPoints());
             remove = true;
-        } else if ((y > BOTTOM_EDGE) || (y < TOP_EDGE) || (x < 0) || (x > Window.getWidth())) {
+        } else if ((y > BOTTOM_EDGE) || (y < TOP_EDGE) || (x < LEFT_EDGE) || (x > RIGHT_EDGE)) {
             remove = true;
         }
     }
